@@ -362,7 +362,7 @@ class entity(object):
         self.action_timer += 1
         self.change_frame(1)
 
-    def change_frame(self,amount):
+    def changeFrame(self,amount):
         self.animation_frame += amount
         if self.animation != None:
             while self.animation_frame < 0:
