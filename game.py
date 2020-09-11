@@ -14,6 +14,7 @@ class Player:
 		self.platformCollision = False
 		self.onPlatform = False
 		self.through = False
+		self.levelOver = False
 
 	def events(self, event, dt):
 		if event.type == KEYDOWN:
@@ -33,7 +34,7 @@ class Player:
 			elif event.key == K_LEFT:
 				self.movingLeft = False
 
-	def update(self, tile_rects, enemiesList, movingList, vertRects, screen, scroll, dt, distance):
+	def update(self, tile_rects, enemiesList, movingList, notCollisionable, screen, scroll, dt, distance):
 		#self.tile_rects, self.enemiesList, self.movingList, [], self.screen, self.scroll, dt, distance
 		self.movement = [0,0]
 		if self.movingRight == True:
@@ -54,7 +55,7 @@ class Player:
 			self.entity.set_flip(True)
 			self.entity.set_action('run')
 
-		collision_types = self.entity.move(self.movement, tile_rects, enemiesList, movingList, vertRects)
+		collision_types = self.entity.move(self.movement, tile_rects, enemiesList, movingList, notCollisionable)
 
 		for platform in collision_types['data']:
 			if platform[1][3]:
@@ -73,6 +74,8 @@ class Player:
 			#print(platform[2])
 			if platform[2] == "spikeTop":
 				return True
+			if platform[2] == "endBall":
+				self.levelOver = True
 
 		if not collision_types['bottom']:
 			self.airTimer += 1
@@ -160,13 +163,13 @@ class ThroughPlat:
 
 class EndBall:
 	def __init__(self, screen, x, y, type):
-		self.entity = e.entity(x, y, 0, 0, type)
+		self.entity = e.entity(x, y, 32, 32, type)
 		self.screen = screen
 		self.type = type
 		self.entity.obj.x = x
 		self.entity.obj.y = y
 
-	def update(self):
+	def update(self, scroll):
 		self.entity.change_frame(1)
 		self.entity.display(self.screen, scroll)
 
@@ -189,8 +192,8 @@ class Level01:
 		self.cornerPlat00 = e.loadImage('data/images/plat24.png', alpha=True)
 		self.cornerPlat01 = e.loadImage('data/images/plat25.png', alpha=True)
 
-		self.barrelBottom = e.loadImage('data/images/deco04.png', alpha=True)
-		self.barrelTop = e.loadImage('data/images/deco03.png', alpha=True)
+		self.barrelBottom = e.loadImage('data/images/barrelBottom.png', alpha=True)
+		self.barrelTop = e.loadImage('data/images/barrelTop.png', alpha=True)
 		self.cable00 = e.loadImage('data/images/deco00.png', alpha=True)
 		self.cable01 = e.loadImage('data/images/deco01.png', alpha=True)
 		self.cable02 = e.loadImage('data/images/deco02.png', alpha=True)
@@ -204,6 +207,7 @@ class Level01:
 		self.player = Player()
 		self.movingList = []
 		self.enemiesList = []
+		self.notCollisionable = []
 		self.trueScroll = [0, 0]
 		self.create = True
 
@@ -262,6 +266,9 @@ class Level01:
 						elif tile == 'm':
 							plat = ThroughPlat(self.screen, x*TILE_SIZE, y*TILE_SIZE, 'throughRight')
 							self.movingList.append(plat)
+						elif tile == 'n':
+							plat = EndBall(self.screen, x*TILE_SIZE, y*TILE_SIZE, 'endBall')
+							self.notCollisionable.append(plat)
 					elif tile == '7':
 						e.displayTile(self.middlePlat02, self.screen, self.scroll, x, y)
 					elif tile == '4':
@@ -292,7 +299,7 @@ class Level01:
 						e.displayTile(self.cable02, self.screen, self.scroll, x, y)
 					elif tile == 'j':
 						e.displayTile(self.middlePlat03, self.screen, self.scroll, x, y)
-					if tile not in ['0', '1', '2', '3', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm']:
+					if tile not in ['0', '1', '2', '3', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n']:
 						self.tile_rects.append(pygame.Rect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE))
 				x += 1
 			y += 1
@@ -305,9 +312,11 @@ class Level01:
 		distance = 0
 		for platform in self.movingList:
 			distance = platform.update(self.scroll)
+		for platform in self.notCollisionable:
+			platform.update(self.scroll)
 		# for enemy in self.enemiesList:
 		# 	enemy.update(self.scroll)
-		if self.player.update(self.tile_rects, self.enemiesList, self.movingList, [], self.screen, self.scroll, dt, distance):
+		if self.player.update(self.tile_rects, self.enemiesList, self.movingList, self.notCollisionable, self.screen, self.scroll, dt, distance):
 			# self.restart()
 			pass
 		return [self.player.entity.obj.x, self.player.entity.obj.y], self.player.airTimer, self.player.momentum, self.scroll

@@ -7,3 +7,4 @@ spikeTop/idle/ 7 loop
 throughMiddle/idle/ 7 loop
 throughLeft/idle/ 7 loop
 throughRight/idle/ 7 loop
+endBall/idle/ 7 loop

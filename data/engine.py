@@ -133,8 +133,8 @@ class physics_obj(object):
         self.y = y
         self.prevX = 0
 
-    def move(self, movement, tiles, enemiesList=[], movingList=[], staticList=[]):
-        #tile_rects, enemiesList, movingList, vertRects
+    def move(self, movement, tiles, enemiesList=[], movingList=[], notCollisionable=[]):
+        #tile_rects, enemiesList, movingList, notCollisionable
         self.x += movement[0]
         self.rect.x = int(self.x)
 
@@ -207,26 +207,27 @@ class physics_obj(object):
                 collision_types['top'] = True
                 markers[3] = True
             collision_types['data'].append([block.entity.obj.rect,markers, type])
-
-            #self.x = self.rect.x
-        #self.y += movement[1]
-        #self.rect.y = int(self.y)
-        # block_hit_list = movingCollision(self.rect,enemiesList)
-        # for block in block_hit_list:
-        #     type = block.type
-        #     markers = [False,False,False,False]
-        #     if movement[1] > 0:
-        #         self.rect.bottom = block.entity.obj.rect.top
-        #         collision_types['bottom'] = True
-        #         markers[2] = True
-        #     elif movement[1] < 0:
-        #         self.rect.top = block.entity.obj.rect.bottom
-        #         collision_types['top'] = True
-        #         markers[3] = True
-        #     collision_types['data'].append([block.entity.obj.rect,markers, type])
-        #     self.change_y = 0
-        #     self.y = self.rect.y
-
+        #====================================================================
+        block_hit_list = movingCollision(self.rect, notCollisionable)
+        for block in block_hit_list:
+            type = block.type
+            markers = [False,False,False,False]
+            if movement[0] > 0:
+                collision_types['right'] = True
+                markers[0] = True
+            elif movement[0] < 0:
+                #self.rect.left = block.entity.obj.rect.right
+                collision_types['left'] = True
+                markers[1] = True
+            elif movement[1] > 0:
+                #self.rect.bottom = block.entity.obj.rect.top
+                collision_types['bottom'] = True
+                markers[2] = True
+            elif movement[1] < 0:
+                #self.rect.top = block.entity.obj.rect.bottom
+                collision_types['top'] = True
+                markers[3] = True
+            collision_types['data'].append([block.entity.obj.rect,markers, type])
         return collision_types
 
 # 3d collision detection
