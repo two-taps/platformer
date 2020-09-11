@@ -318,12 +318,12 @@ class Level01:
 			distance = platform.update(self.scroll)
 		for platform in self.notCollisionable:
 			platform.update(self.scroll)
-		# for enemy in self.enemiesList:
-		# 	enemy.update(self.scroll)
+		for enemy in self.enemiesList:
+			enemy.update(self.scroll)
 		levelData = self.player.update(self.tile_rects, self.enemiesList, self.movingList, self.notCollisionable, self.screen, self.scroll, dt, distance)
 		if levelData[0]: # restart level
-			# self.restart()
-			pass
+			self.restart()
+			#pass
 		if levelData[1]: #level is over, go to next level
 			levelIsOver = True
 
@@ -482,12 +482,12 @@ class Level02:
 			distance = platform.update(self.scroll)
 		for platform in self.notCollisionable:
 			platform.update(self.scroll)
-		# for enemy in self.enemiesList:
-		# 	enemy.update(self.scroll)
+		for enemy in self.enemiesList:
+			enemy.update(self.scroll)
 		levelData = self.player.update(self.tile_rects, self.enemiesList, self.movingList, self.notCollisionable, self.screen, self.scroll, dt, distance)
 		if levelData[0]: # restart level
-			# self.restart()
-			pass
+			self.restart()
+			#pass
 		if levelData[1]: #level is over, go to next level
 			levelIsOver = True
 
