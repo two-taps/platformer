@@ -158,9 +158,17 @@ class ThroughPlat:
 		self.entity.change_frame(1)
 		self.entity.display(self.screen, scroll)
 
-class Nail:
-	def __init__(self):
-		pass
+class EndBall:
+	def __init__(self, screen, x, y, type):
+		self.entity = e.entity(x, y, 0, 0, type)
+		self.screen = screen
+		self.type = type
+		self.entity.obj.x = x
+		self.entity.obj.y = y
+
+	def update(self):
+		self.entity.change_frame(1)
+		self.entity.display(self.screen, scroll)
 
 class Level01:
 	def __init__(self, screen):
@@ -297,10 +305,11 @@ class Level01:
 		distance = 0
 		for platform in self.movingList:
 			distance = platform.update(self.scroll)
-		for enemy in self.enemiesList:
-			enemy.update(self.scroll)
+		# for enemy in self.enemiesList:
+		# 	enemy.update(self.scroll)
 		if self.player.update(self.tile_rects, self.enemiesList, self.movingList, [], self.screen, self.scroll, dt, distance):
-			self.restart()
+			# self.restart()
+			pass
 		return [self.player.entity.obj.x, self.player.entity.obj.y], self.player.airTimer, self.player.momentum, self.scroll
 
 	def restart(self):
@@ -322,11 +331,14 @@ class Game:
 		self.smallFont = smallFont
 		self.largeFont = largeFont
 		self.pause = Pause(self.screen)
+		self.levelList = [Level01(self.screen),
+						  ]
 		self.level01 = Level01(self.screen)
 		self.running = True
 		self.isPaused = False
 		self.fullscreen = False
 		self.restart = False
+		self.levelIndex = 0
 		self.screen.set_alpha(None)
 
 		self.startTime: int = 0
@@ -383,6 +395,8 @@ class Game:
 		if self.restart:
 			self.level01.restart()
 			self.restart = False
+		if movement[1] >= 1200:
+			self.restart = True
 
 		if self.showFPS :
 			self.smallFont.render(self.screen, str(self.currentFPS), (WIDTH - 40, 20), RED)
