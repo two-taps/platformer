@@ -57,6 +57,7 @@ class Player:
 
 		collision_types = self.entity.move(self.movement, tile_rects, enemiesList, movingList, notCollisionable)
 
+		exitData = [False, False]
 		for platform in collision_types['data']:
 			if platform[1][3]:
 				self.airTimer = 0
@@ -73,15 +74,17 @@ class Player:
 				self.onPlatform = False
 			#print(platform[2])
 			if platform[2] == "spikeTop":
-				return True
+				exitData[0] = True
 			if platform[2] == "endBall":
 				self.levelOver = True
+				exitData[1] = True
 
 		if not collision_types['bottom']:
 			self.airTimer += 1
 
 		self.entity.change_frame(1)
 		self.entity.display(screen, scroll)
+		return exitData
 
 class MovingPlatform:
 	def __init__(self, screen, x, y, type, maxAxis, speed):
@@ -310,16 +313,21 @@ class Level01:
 
 	def update(self, dt):
 		distance = 0
+		levelIsOver = False
 		for platform in self.movingList:
 			distance = platform.update(self.scroll)
 		for platform in self.notCollisionable:
 			platform.update(self.scroll)
 		# for enemy in self.enemiesList:
 		# 	enemy.update(self.scroll)
-		if self.player.update(self.tile_rects, self.enemiesList, self.movingList, self.notCollisionable, self.screen, self.scroll, dt, distance):
+		levelData = self.player.update(self.tile_rects, self.enemiesList, self.movingList, self.notCollisionable, self.screen, self.scroll, dt, distance)
+		if levelData[0]: # restart level
 			# self.restart()
 			pass
-		return [self.player.entity.obj.x, self.player.entity.obj.y], self.player.airTimer, self.player.momentum, self.scroll
+		if levelData[1]: #level is over, go to next level
+			levelIsOver = True
+
+		return [self.player.entity.obj.x, self.player.entity.obj.y], self.player.airTimer, self.player.momentum, self.scroll, levelIsOver
 
 	def restart(self):
 		self.player = Player()
@@ -332,6 +340,171 @@ class Level01:
 		self.player.movement = [0,0]
 		self.player.entity.set_pos(pos[0], pos[1])
 
+class Level02:
+	def __init__(self, screen):
+		self.screen = screen
+
+		self.layer00 = e.loadImage('data/images/background30.png', alpha=True)
+		self.layer01 = e.loadImage('data/images/background31.png', alpha=True)
+		self.layer02 = e.loadImage('data/images/background32.png', alpha=True)
+		self.layerList = [self.layer00, self.layer01, self.layer02]
+
+		self.leftPlat = e.loadImage('data/images/plat07.png')
+		self.rightPlat = e.loadImage('data/images/plat10.png')
+		self.middlePlat00 = e.loadImage('data/images/plat08.png')
+		self.middlePlat01 = e.loadImage('data/images/plat09.png')
+		self.middlePlat02 = e.loadImage('data/images/plat06.png')
+		self.middlePlat03 = e.loadImage('data/images/plat11.png', alpha=True)
+
+		self.cornerPlat00 = e.loadImage('data/images/plat24.png', alpha=True)
+		self.cornerPlat01 = e.loadImage('data/images/plat25.png', alpha=True)
+
+		self.barrelBottom = e.loadImage('data/images/barrelBottom.png', alpha=True)
+		self.barrelTop = e.loadImage('data/images/barrelTop.png', alpha=True)
+		self.cable00 = e.loadImage('data/images/deco00.png', alpha=True)
+		self.cable01 = e.loadImage('data/images/deco01.png', alpha=True)
+		self.cable02 = e.loadImage('data/images/deco02.png', alpha=True)
+		self.chainBottom = e.loadImage('data/images/chainBottom.png', alpha=True)
+		self.chain = e.loadImage('data/images/chain.png', alpha=True)
+
+		self.spikes = e.loadImage('data/images/chainBottom.png', alpha=True)
+
+		self.static = e.loadImage('data/images/plat12.png', alpha=True)
+		self.gameMap = e.load_map('map02')
+		self.player = Player()
+		self.movingList = []
+		self.enemiesList = []
+		self.notCollisionable = []
+		self.trueScroll = [0, 0]
+		self.create = True
+
+	def draw(self, dt):
+		self.screen.fill(BEIGE)
+
+		self.trueScroll[0] += (self.player.entity.x -
+							   self.trueScroll[0] - (WIDTH/2))/20
+		self.trueScroll[1] += (self.player.entity.y -
+							   self.trueScroll[1] - (HEIGHT/2))/20
+
+		self.scroll = self.trueScroll.copy()
+		self.scroll[0] = int(self.scroll[0])
+		self.scroll[1] = int(self.scroll[1])
+
+		i = 0
+		for layer in self.layerList:
+			self.screen.blit(layer, (-100 - self.scroll[0]*FAST_SPEED[i],
+									 -150 - (self.scroll[1] / 1)*FAST_SPEED[i]))
+			i += 1
+
+		self.tile_rects = []
+		self.jumpRects = []
+		self.platRects = []
+
+		y = 0
+		for layer in self.gameMap:
+			x = 0
+			for tile in layer:
+				if x >= 0 and x <= WIDTH and y >= 0 and y <= HEIGHT:
+					if self.create:
+						if tile == '1':
+							plat = StaticPlatform(self.screen, x*TILE_SIZE, y*TILE_SIZE)
+							self.movingList.append(plat)
+						elif tile == '2':
+							plat = MovingPlatform(self.screen,
+												  x * TILE_SIZE, y * TILE_SIZE,
+												  "vertical", 90, 3)
+							self.movingList.append(plat)
+						elif tile == '3':
+							plat = MovingPlatform(self.screen,
+												  x * TILE_SIZE, y * TILE_SIZE,
+												  "horizontal", 90, 3.5)
+							self.movingList.append(plat)
+						elif tile == 'b':
+							enemy = Spike(self.screen,
+										  x * TILE_SIZE, y * TILE_SIZE + 16,
+										  "spikeTop")
+							self.enemiesList.append(enemy)
+						elif tile == 'k':
+							plat = ThroughPlat(self.screen, x*TILE_SIZE, y*TILE_SIZE, 'throughMiddle')
+							self.movingList.append(plat)
+						elif tile == 'l':
+							plat = ThroughPlat(self.screen, x*TILE_SIZE, y*TILE_SIZE, 'throughLeft')
+							self.movingList.append(plat)
+						elif tile == 'm':
+							plat = ThroughPlat(self.screen, x*TILE_SIZE, y*TILE_SIZE, 'throughRight')
+							self.movingList.append(plat)
+						elif tile == 'n':
+							plat = EndBall(self.screen, x*TILE_SIZE, y*TILE_SIZE, 'endBall')
+							self.notCollisionable.append(plat)
+					elif tile == '7':
+						e.displayTile(self.middlePlat02, self.screen, self.scroll, x, y)
+					elif tile == '4':
+						e.displayTile(self.leftPlat, self.screen, self.scroll, x, y)
+					elif tile == '5':
+						e.displayTile(self.middlePlat00, self.screen, self.scroll, x, y)
+					elif tile == '6':
+						e.displayTile(self.middlePlat01, self.screen, self.scroll, x, y)
+					elif tile == '8':
+						e.displayTile(self.rightPlat, self.screen, self.scroll, x, y)
+					elif tile == '9':
+						e.displayTile(self.cornerPlat00, self.screen, self.scroll, x, y)
+					elif tile == 'a':
+						e.displayTile(self.cornerPlat01, self.screen, self.scroll, x, y)
+					elif tile == 'c':
+						e.displayTile(self.barrelBottom, self.screen, self.scroll, x, y)
+					elif tile == 'd':
+						e.displayTile(self.barrelTop, self.screen, self.scroll, x, y)
+					elif tile == 'e':
+						e.displayTile(self.chain, self.screen, self.scroll, x, y)
+					elif tile == 'f':
+						e.displayTile(self.chainBottom, self.screen, self.scroll, x, y)
+					elif tile == 'g':
+						e.displayTile(self.cable00, self.screen, self.scroll, x, y)
+					elif tile == 'h':
+						e.displayTile(self.cable01, self.screen, self.scroll, x, y)
+					elif tile == 'i':
+						e.displayTile(self.cable02, self.screen, self.scroll, x, y)
+					elif tile == 'j':
+						e.displayTile(self.middlePlat03, self.screen, self.scroll, x, y)
+					if tile not in ['0', '1', '2', '3', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n']:
+						self.tile_rects.append(pygame.Rect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE))
+				x += 1
+			y += 1
+		self.create = False
+
+	def events(self, event, dt):
+		self.player.events(event, dt)
+
+	def update(self, dt):
+		distance = 0
+		levelIsOver = False
+		for platform in self.movingList:
+			distance = platform.update(self.scroll)
+		for platform in self.notCollisionable:
+			platform.update(self.scroll)
+		# for enemy in self.enemiesList:
+		# 	enemy.update(self.scroll)
+		levelData = self.player.update(self.tile_rects, self.enemiesList, self.movingList, self.notCollisionable, self.screen, self.scroll, dt, distance)
+		if levelData[0]: # restart level
+			# self.restart()
+			pass
+		if levelData[1]: #level is over, go to next level
+			levelIsOver = True
+
+		return [self.player.entity.obj.x, self.player.entity.obj.y], self.player.airTimer, self.player.momentum, self.scroll, levelIsOver
+
+	def restart(self):
+		self.player = Player()
+
+	def restartVariables(self, pos):
+		self.player.movingRight = False
+		self.player.movingLeft = False
+		self.player.momentum = 0
+		self.player.airTimer = 0
+		self.player.movement = [0,0]
+		self.player.entity.set_pos(pos[0], pos[1])
+
+
 class Game:
 	def __init__(self, screen, clock, smallFont, largeFont):
 		e.load_animations('data/images/entities/')
@@ -341,7 +514,7 @@ class Game:
 		self.largeFont = largeFont
 		self.pause = Pause(self.screen)
 		self.levelList = [Level01(self.screen),
-						  ]
+						  Level02(self.screen)]
 		self.level01 = Level01(self.screen)
 		self.running = True
 		self.isPaused = False
@@ -379,13 +552,15 @@ class Game:
 			pygame.time.delay(max(0, int(self.delay - self.timeElapsed)))
 
 	def draw(self):
-		self.level01.draw(self.dt)
+		#self.level01.draw(self.dt)
+		self.levelList[self.levelIndex].draw(self.dt)
 
 	def events(self):
 		self.running = e.checkCloseButtons()
 
 		for event in pygame.event.get():
-			self.level01.events(event, self.dt)
+			#self.level01.events(event, self.dt)
+			self.levelList[self.levelIndex].events(event, self.dt)
 			self.running, self.fullscreen, self.screen = e.checkEvents(event, self.running, self.fullscreen, self.screen)
 			if event.type == KEYDOWN:
 				if event.key == K_ESCAPE:
@@ -394,16 +569,20 @@ class Game:
 					self.restart = True
 
 	def update(self):
-		movement, airTimer, momentum, scroll = self.level01.update(self.dt)
+		#movement, airTimer, momentum, scroll = self.level01.update(self.dt)
+		movement, airTimer, momentum, scroll, levelIsOver = self.levelList[self.levelIndex].update(self.dt)
 		if self.isPaused:
-			pos = [self.level01.player.entity.x, self.level01.player.entity.y]
-			self.level01.restartVariables(pos)
+			pos = [self.levelList[self.levelIndex].player.entity.x, self.levelList[self.levelIndex].player.entity.y]
+			self.levelList[self.levelIndex].restartVariables(pos)
 			screenshot = self.screen.copy()
 			self.pause.start(screenshot)
 			self.isPaused = not self.isPaused
 		if self.restart:
-			self.level01.restart()
+			#self.level01.restart()
+			self.levelList[self.levelIndex].restart()
 			self.restart = False
+		if levelIsOver:
+			self.levelIndex += 1
 		if movement[1] >= 1200:
 			self.restart = True
 
