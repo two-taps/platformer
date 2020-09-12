@@ -779,7 +779,7 @@ class MainMenu:
 	def draw(self):
 		self.start_time = time.time()
 		self.background.display(self.screen, [0, 0])
-		self.background.changeFrame(1)
+		self.background.changerame(1)
 
 		self.largeFont.render(self.screen, 'Main Menu', (20, 55), WHITE)
 

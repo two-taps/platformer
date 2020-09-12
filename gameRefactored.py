@@ -4,8 +4,8 @@ from pygame.locals import *
 from settings import *
 
 class Player:
-	def __init__(self):
-		self.entity = e.entity(50, 200, 14, 29, 'player')
+	def __init__(self, x, y):
+		self.entity = e.entity(x, y, 14, 29, 'player')
 		self.movingRight = False
 		self.movingLeft = False
 		self.momentum = 0
@@ -20,18 +20,29 @@ class Player:
 		if event.type == KEYDOWN:
 			if event.key == K_RIGHT:
 				self.movingRight = True
-			elif event.key == K_LEFT:
+			if event.key == K_d:
+				self.movingRight = True
+			if event.key == K_LEFT:
 				self.movingLeft = True
-			elif event.key == K_UP:
+			if event.key == K_a:
+				self.movingLeft = True
+			if event.key == K_UP:
 				if self.airTimer == 0:
 					self.momentum = -5
-			elif event.key == K_DOWN:
+			if event.key == K_w:
+				if self.airTimer == 0:
+					self.momentum = -5
+			if event.key == K_DOWN or K_s:
 				if self.onPlatform:
 					self.through = True
 		if event.type == KEYUP:
 			if event.key == K_RIGHT:
 				self.movingRight = False
-			elif event.key == K_LEFT:
+			if event.key == K_d:
+				self.movingRight = False
+			if event.key == K_LEFT:
+				self.movingLeft = False
+			if event.key == K_a:
 				self.movingLeft = False
 
 	def update(self, tile_rects, enemiesList, movingList, notCollisionable, screen, scroll, dt, distance):
@@ -79,6 +90,9 @@ class Player:
 			if platform[2] == "endBall":
 				self.levelOver = True
 				exitData[1] = True
+			# if platform[2] == 'throughMiddle' or platform[2] == 'throughLeft' or platform[2] == 'throughRight':
+			# 	if self.through:
+			# 		self.entity.top = platform[0].bottom
 
 		if not collisionList['bottom']:
 			self.airTimer += 1
@@ -149,7 +163,7 @@ class StaticPlatform(MapObject):
 		return MOVING_SPEED
 
 class MapLevel:
-	def __init__(self, screen, map):
+	def __init__(self, screen):
 		self.screen = screen
 
 		self.layer00 = e.loadImage('data/images/background30.png', alpha=True)
@@ -178,8 +192,8 @@ class MapLevel:
 		self.spikes = e.loadImage('data/images/chainBottom.png', alpha=True)
 
 		self.static = e.loadImage('data/images/plat12.png', alpha=True)
-		self.gameMap = e.load_map(map)
-		self.player = Player()
+		#self.gameMap = e.load_map(map)
+		#self.player = Player()
 		self.movingList = []
 		self.enemiesList = []
 		self.notCollisionable = []
@@ -306,6 +320,17 @@ class MapLevel:
 		self.player.movement = [0,0]
 		self.player.entity.set_pos(pos[0], pos[1])
 
+class Level01(MapLevel):
+	def __init__(self, screen, x, y, map):
+		super().__init__(screen)
+		self.player = Player(x, y)
+		self.playerStartingX = x
+		self.playerStartingY = y
+		self.gameMap = e.load_map(map)
+
+	def restart(self):
+		self.player = Player(self.playerStartingX, self.playerStartingY)
+
 class Game:
 	def __init__(self, screen, clock, smallFont, largeFont):
 		e.load_animations('data/images/entities/')
@@ -314,8 +339,8 @@ class Game:
 		self.smallFont = smallFont
 		self.largeFont = largeFont
 		self.pause = Pause(self.screen)
-		self.levelList = [MapLevel(self.screen, 'map01'),
-						  MapLevel(self.screen, 'map02')]
+		self.levelList = [Level01(self.screen, 50, 200, 'map01'),
+						  Level01(self.screen, 50, 300, 'map02')]
 		#self.level01 = Level01(self.screen)
 		self.running = True
 		self.isPaused = False
