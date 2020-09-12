@@ -732,7 +732,7 @@ class Core:
         pygame.init()
         pygame.mixer.pre_init(44100, -16, 2, 512)
         pygame.mixer.set_num_channels(64)
-        pygame.display.set_caption('game')
+        pygame.display.set_caption('platformer')
         self.screen = pygame.display.set_mode(WINDOW_SIZE, 0, 32)
         self.clock = pygame.time.Clock()
         pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
