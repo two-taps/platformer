@@ -402,20 +402,17 @@ class Game:
                                     str(int(scroll[1])), (20, 80), WHITE)
         pygame.display.update()
 
-class Video:
-    def __init__(self, screen, clock, smallFont, largeFont):
+class MenuScreen:
+    def __init__(self, screen, clock, smallFont, largeFont, background):
         self.clock = clock
         self.screen = screen
         self.smallFont = smallFont
         self.largeFont = largeFont
         self.showFPS = True
         self.fullscreen = False
-        self.background = e.entity(0, 0, 640, 480, 'background')
+        self.background = e.entity(0, 0, 640, 480, background)
         self.button = pygame.image.load('data/images/button.png').convert_alpha()
         self.selectedButton = pygame.image.load('data/images/buttonPressed.png').convert_alpha()
-        self.stateList = [True, False, False]
-        self.buttonList = ['Fullscreen', 'Show FPS', 'Back']
-        self.descriptions = [['Yes', 'No'], ['Yes', 'No'], 'Go back to Options']
 
     def start(self, showFPS):
         self.showFPS = showFPS
@@ -429,8 +426,28 @@ class Video:
     def draw(self):
         self.background.display(self.screen, [0, 0])
         self.background.changeFrame(1)
+        self.largeFont.render(self.screen, self.title, (20, 55), WHITE)
 
-        self.largeFont.render(self.screen, 'Video', (20, 55), WHITE)
+    def events(self):
+        pass
+
+    def update(self):
+        pass
+
+    def fillArray(self, array):
+        for x in range(len(array)):
+            array[x] = False
+        return array
+
+class VideoMenu(MenuScreen):
+    def __init__(self, screen, clock, smallFont, largeFont, background):
+        super().__init__(screen, clock, smallFont, largeFont, background)
+        self.stateList = [True, False, False]
+        self.buttonList = ['Fullscreen', 'Show FPS', 'Back']
+        self.descriptions = [['Yes', 'No'],
+                             ['Yes', 'No'],
+                             'Go back to Options']
+        self.title = 'Video'
 
     def events(self):
         self.running = e.checkCloseButtons()
@@ -507,43 +524,16 @@ class Video:
         pygame.display.update()
         self.clock.tick(FPS)
 
-    def fillArray(self, array):
-        for x in range(len(array)):
-            array[x] = False
-        return array
-
-class Options:
-    def __init__(self, screen, clock, smallFont, largeFont):
-        self.clock = clock
-        self.screen = screen
-        self.smallFont = smallFont
-        self.largeFont = largeFont
-        self.background = e.entity(0, 0, 640, 480, 'background')
-        self.video = Video(self.screen, self.clock, self.smallFont, self.largeFont)
-        self.button = pygame.image.load('data/images/button.png').convert_alpha()
-        self.selectedButton = pygame.image.load('data/images/buttonPressed.png').convert_alpha()
+class OptionsMenu(MenuScreen):
+    def __init__(self, screen, clock, smallFont, largeFont, background):
+        super().__init__(screen, clock, smallFont, largeFont, background)
         self.stateList = [True, False, False]
         self.buttonList = ['Video', 'Controls', 'Back']
         self.descriptions = ['Video options',
                              'See controls in game',
                              'Go back to Main Menu']
-        self.fullscreen = False
-        self.showFPS = True
-
-    def start(self, showFPS):
-        self.showFPS = showFPS
-        self.running = True
-        while self.running:
-            self.start_time = time.time()
-            self.draw()
-            self.events()
-            self.update()
-
-    def draw(self):
-        self.background.display(self.screen, [0, 0])
-        self.background.changeFrame(1)
-
-        self.largeFont.render(self.screen, 'Options', (20, 55), WHITE)
+        self.title = 'Options'
+        self.video = VideoMenu(self.screen, self.clock, self.smallFont, self.largeFont, 'background')
 
     def events(self):
         self.running = e.checkCloseButtons()
@@ -608,11 +598,6 @@ class Options:
         pygame.display.update()
         self.clock.tick(FPS)
 
-    def fillArray(self, array):
-        for x in range(len(array)):
-            array[x] = False
-        return array
-
 class MainMenu:
     def __init__(self, screen, game, smallFont, largeFont, clock):
         self.screen = screen
@@ -621,7 +606,7 @@ class MainMenu:
         self.smallFont = smallFont
         self.largeFont = largeFont
         self.background = e.entity(0, 0, 640, 480, 'background')
-        self.options = Options(self.screen, self.clock, self.smallFont, self.largeFont)
+        self.options = OptionsMenu(self.screen, self.clock, self.smallFont, self.largeFont, 'background')
         self.button = pygame.image.load('data/images/button.png').convert_alpha()
         self.selectedButton = pygame.image.load('data/images/buttonPressed.png').convert_alpha()
         self.stateList = [True, False, False, False]
