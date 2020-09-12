@@ -541,7 +541,28 @@ class Options:
                     if index != 0:
                         self.stateList[index] = False
                         self.stateList[index - 1] = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                if pos[0] >= 44 and pos[0] <= 174:
+                    if pos[1] >= 187 and pos[1] <= 216:
+                        self.video.start(self.showFPS)
+                    elif pos[1] >= 228 and pos[1] <= 261:
+                        pass
+                    elif pos[1] >= 271 and pos[1] <= 301:
+                        self.running = False
+
     def update(self):
+        pos = pygame.mouse.get_pos()
+        if pos[0] >= 44 and pos[0] <= 174:
+            if pos[1] >= 187 and pos[1] <= 216:
+                self.stateList = self.fillArray(self.stateList)
+                self.stateList[0] = True
+            elif pos[1] >= 228 and pos[1] <= 261:
+                self.stateList = self.fillArray(self.stateList)
+                self.stateList[1] = True
+            elif pos[1] >= 271 and pos[1] <= 301:
+                self.stateList = self.fillArray(self.stateList)
+                self.stateList[2] = True
         y = 180
         i = 0
         for state in self.stateList:
@@ -561,6 +582,11 @@ class Options:
             self.smallFont.render(self.screen, fps, (WIDTH - 40, 20))
         pygame.display.update()
         self.clock.tick(FPS)
+        
+    def fillArray(self, array):
+        for x in range(len(array)):
+            array[x] = False
+        return array
 
 class MainMenu:
     def __init__(self, screen, game, smallFont, largeFont, clock):
@@ -619,7 +645,6 @@ class MainMenu:
                     pass
                 elif pos[1] >= 314 and pos[1] <= 346:
                     return False
-            print(pos)
         return True
 
     def update(self):
