@@ -163,7 +163,7 @@ class StaticPlatform(MapObject):
 		return MOVING_SPEED
 
 class MapLevel:
-	def __init__(self, screen):
+	def __init__(self, screen, x, y, map):
 		self.screen = screen
 
 		self.layer00 = e.loadImage('data/images/background30.png', alpha=True)
@@ -192,8 +192,8 @@ class MapLevel:
 		self.spikes = e.loadImage('data/images/chainBottom.png', alpha=True)
 
 		self.static = e.loadImage('data/images/plat12.png', alpha=True)
-		#self.gameMap = e.load_map(map)
-		#self.player = Player()
+		self.gameMap = e.load_map(map)
+		self.player = Player(x, y)
 		self.movingList = []
 		self.enemiesList = []
 		self.notCollisionable = []
@@ -339,8 +339,8 @@ class Game:
 		self.smallFont = smallFont
 		self.largeFont = largeFont
 		self.pause = Pause(self.screen)
-		self.levelList = [Level01(self.screen, 50, 200, 'map01'),
-						  Level01(self.screen, 50, 300, 'map02')]
+		self.levelList = [MapLevel(self.screen, 50, 200, 'map01'),
+						  MapLevel(self.screen, 140, 500, 'map02')]
 		#self.level01 = Level01(self.screen)
 		self.running = True
 		self.isPaused = False
