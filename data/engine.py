@@ -133,7 +133,7 @@ class physics_obj(object):
         self.y = y
         self.prevX = 0
 
-    def move(self, movement, tiles, enemiesList=[], movingList=[], notCollisionable=[]):
+    def move(self, movement, tiles, enemiesList=[], movingList=[], notCollisionable=[], airTimer=0):
         #tile_rects, enemiesList, movingList, notCollisionable
         self.x += movement[0]
         self.rect.x = int(self.x)
@@ -141,7 +141,7 @@ class physics_obj(object):
         collision_types = {'top':False,'bottom':False,'right':False,'left':False,'slant_bottom':False,'data':[]}
         # added collision data to "collision_types". ignore the poorly chosen variable name
         #====================================================================
-        block_hit_list = collision_test(self.rect,tiles)
+        block_hit_list = collision_test(self.rect, tiles)
         for block in block_hit_list:
             type = "tile"
             markers = [False,False,False,False]
@@ -178,8 +178,14 @@ class physics_obj(object):
         for block in block_hit_list:
             type = block.type
             markers = [False,False,False,False]
-            if movement[1] > 0:
+            tol = abs(self.rect.bottom - block.entity.obj.rect.top)
+            # print(tol)
+            if movement[1] > 0 and tol < 16:#and self.rect.y + 27 <= block.entity.obj.rect.y and airTimer > 0:
+
                 self.rect.bottom = block.entity.obj.rect.top
+                # print(self.rect.bottom , block.entity.obj.rect.top)
+                # print(self.rect.y , block.entity.obj.rect.y)
+                #(self.rect.y, block.entity.obj.rect.y)
                 collision_types['bottom'] = True
                 markers[2] = True
             collision_types['data'].append([block.entity.obj.rect,markers, type])
@@ -302,8 +308,8 @@ class entity(object):
         self.obj.rect.x = x
         self.obj.rect.y = y
 
-    def move(self,momentum,platforms,ramps=[], platRects=[], vertRects=[]):
-        collisions = self.obj.move(momentum,platforms,ramps, platRects, vertRects)
+    def move(self,momentum,platforms,ramps=[], platRects=[], vertRects=[], airTimer=0):
+        collisions = self.obj.move(momentum,platforms,ramps, platRects, vertRects, airTimer)
         self.x = self.obj.x
         self.y = self.obj.y
         return collisions

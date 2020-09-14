@@ -65,7 +65,7 @@ class Player:
             self.entity.set_flip(True)
             self.entity.set_action('run')
 
-        collisionList = self.entity.move(self.movement, tile_rects, enemiesList, movingList, notCollisionable)
+        collisionList = self.entity.move(self.movement, tile_rects, enemiesList, movingList, notCollisionable, self.airTimer)
 
         exitData = [False, False]
 
