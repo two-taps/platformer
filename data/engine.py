@@ -172,20 +172,14 @@ class physics_obj(object):
             collision_types['data'].append([block,markers, type])
             self.change_y = 0
             self.y = self.rect.y
-
         #====================================================================
         block_hit_list = movingCollision(self.rect, movingList)
         for block in block_hit_list:
             type = block.type
             markers = [False,False,False,False]
             tol = abs(self.rect.bottom - block.entity.obj.rect.top)
-            # print(tol)
-            if movement[1] > 0 and tol < 16:#and self.rect.y + 27 <= block.entity.obj.rect.y and airTimer > 0:
-
+            if movement[1] > 0 and tol < 16:
                 self.rect.bottom = block.entity.obj.rect.top
-                # print(self.rect.bottom , block.entity.obj.rect.top)
-                # print(self.rect.y , block.entity.obj.rect.y)
-                #(self.rect.y, block.entity.obj.rect.y)
                 collision_types['bottom'] = True
                 markers[2] = True
             collision_types['data'].append([block.entity.obj.rect,markers, type])

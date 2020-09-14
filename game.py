@@ -32,9 +32,11 @@ class Player:
             if event.key == K_w:
                 if self.airTimer == 0:
                     self.momentum = -5
-            if event.key == K_DOWN or K_s:
-                if self.onPlatform:
-                    self.through = True
+            if event.key == K_DOWN:
+                self.through = not self.through
+            if event.key == K_s:
+                self.through = not self.through
+
         if event.type == KEYUP:
             if event.key == K_RIGHT:
                 self.movingRight = False
@@ -81,6 +83,11 @@ class Player:
                 self.entity.obj.x += distance
             if platform[2] == "static":
                 self.onPlatform = True
+            if platform[2] == 'throughMiddle':
+                if self.through:
+                    #HERE IS WHERE I DONT KNOW WHAT TO DO
+                    pass
+
             else:
                 self.onPlatform = False
             if platform[2] == "spikeTop":
