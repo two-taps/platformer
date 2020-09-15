@@ -87,7 +87,6 @@ class Player:
                 if self.through:
                     #HERE IS WHERE I DONT KNOW WHAT TO DO
                     pass
-
             else:
                 self.onPlatform = False
             if platform[2] == "spikeTop":
@@ -194,7 +193,7 @@ class MapLevel:
         self.spikes = e.loadImage('data/images/chainBottom.png', alpha=True)
 
         self.static = e.loadImage('data/images/plat12.png', alpha=True)
-        self.gameMap = e.load_map(map)
+        self.gameMap = e.load_map('data/' + map)
         self.player = Player(x, y)
         self.playerX = x
         self.playerY = y
