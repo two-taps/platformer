@@ -416,7 +416,6 @@ def fade(width, height, screenshot, screen):
         screen.blit(screenshot, (0, 0))
         screen.blit(fade, (0,0))
         pygame.display.update()
-        #pygame.time.delay(1)
 
 class MenuScreen:
     def __init__(self, screen, clock, smallFont, largeFont, background):
@@ -427,8 +426,8 @@ class MenuScreen:
         self.showFPS = True
         self.fullscreen = False
         self.background = e.entity(0, 0, 640, 480, background)
-        self.button = pygame.image.load('data/images/button.png').convert_alpha()
-        self.selectedButton = pygame.image.load('data/images/buttonPressed.png').convert_alpha()
+        self.button = pygame.image.load('data/images/button01.png').convert_alpha()
+        self.selectedButton = pygame.image.load('data/images/buttonPressed01.png').convert_alpha()
 
     def start(self, showFPS):
         self.showFPS = showFPS
@@ -442,7 +441,7 @@ class MenuScreen:
     def draw(self):
         self.background.display(self.screen, [0, 0])
         self.background.changeFrame(1)
-        self.largeFont.render(self.screen, self.title, (20, 55), WHITE)
+        self.largeFont.render(self.screen, self.title, (40, 120), WHITE)
 
     def events(self):
         pass
@@ -549,7 +548,7 @@ class OptionsMenu(MenuScreen):
                              'See controls in game',
                              'Go back to Main Menu']
         self.title = 'Options'
-        self.video = VideoMenu(self.screen, self.clock, self.smallFont, self.largeFont, 'background')
+        self.video = VideoMenu(self.screen, self.clock, self.smallFont, self.largeFont, 'menuBackground')
 
     def events(self):
         self.running = e.checkCloseButtons()
@@ -621,10 +620,10 @@ class MainMenu:
         self.game = game
         self.smallFont = smallFont
         self.largeFont = largeFont
-        self.background = e.entity(0, 0, 640, 480, 'background')
-        self.options = OptionsMenu(self.screen, self.clock, self.smallFont, self.largeFont, 'background')
-        self.button = pygame.image.load('data/images/button.png').convert_alpha()
-        self.selectedButton = pygame.image.load('data/images/buttonPressed.png').convert_alpha()
+        self.background = e.entity(0, 0, 640, 480, 'menuBackground')
+        self.options = OptionsMenu(self.screen, self.clock, self.smallFont, self.largeFont, 'menuBackground')
+        self.button = pygame.image.load('data/images/button01.png').convert_alpha()
+        self.selectedButton = pygame.image.load('data/images/buttonPressed01.png').convert_alpha()
         self.stateList = [True, False, False, False]
         self.buttonList = ['Start', 'Options', 'About', 'Quit']
         self.descriptions = ['Start a new game',
@@ -639,7 +638,7 @@ class MainMenu:
         self.background.display(self.screen, [0, 0])
         self.background.changeFrame(1)
 
-        self.largeFont.render(self.screen, 'Main Menu', (20, 55), WHITE)
+        self.largeFont.render(self.screen, 'Main Menu', (40, 120), WHITE)
 
     def events(self, event):
         index = self.stateList.index(True)

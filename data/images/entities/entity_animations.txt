@@ -10,3 +10,4 @@ throughMiddle/idle/ 7 loop
 throughLeft/idle/ 7 loop
 throughRight/idle/ 7 loop
 endBall/idle/ 7 loop
+menuBackground/idle/ 9;9;9;9;9;9;9;9;9;9;9;9;9 loop

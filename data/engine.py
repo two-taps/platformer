@@ -376,6 +376,7 @@ class entity(object):
                 else:
                     self.animation_frame = len(self.animation)-1
 
+
     def get_current_img(self):
         if self.animation == None:
             if self.image != None:
