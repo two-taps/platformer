@@ -167,9 +167,9 @@ class MapLevel:
     def __init__(self, screen, x, y, map):
         self.screen = screen
 
-        self.layer00 = e.loadImage('data/images/background30.png', alpha=True)
-        self.layer01 = e.loadImage('data/images/background31.png', alpha=True)
-        self.layer02 = e.loadImage('data/images/background32.png', alpha=True)
+        self.layer00 = e.loadImage('data/images/background40.png', alpha=True)
+        self.layer01 = e.loadImage('data/images/background41.png', alpha=True)
+        self.layer02 = e.loadImage('data/images/background42.png', alpha=True)
         self.layerList = [self.layer00, self.layer01, self.layer02]
 
         self.leftPlat = e.loadImage('data/images/plat07.png')
