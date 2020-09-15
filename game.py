@@ -706,7 +706,7 @@ class MainMenu:
             i += 1
         self.showFPS = self.options.showFPS
         if self.showFPS:
-            fps = str(int(self.clock.get_fps()))
+            fps = str(int(1.0 / (time.time() - self.start_time)))
             self.smallFont.render(self.screen, fps, (WIDTH - 40, 20))
         self.screenshot = self.screen.copy()
 
