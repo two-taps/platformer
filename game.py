@@ -408,6 +408,16 @@ class Game:
                                     str(int(scroll[1])), (20, 80), WHITE)
         pygame.display.update()
 
+def fade(width, height, screenshot, screen):
+    fade = pygame.Surface((width, height))
+    fade.fill((0,0,0))
+    for alpha in range(0, 300):
+        fade.set_alpha(alpha)
+        screen.blit(screenshot, (0, 0))
+        screen.blit(fade, (0,0))
+        pygame.display.update()
+        #pygame.time.delay(1)
+
 class MenuScreen:
     def __init__(self, screen, clock, smallFont, largeFont, background):
         self.clock = clock
@@ -622,6 +632,7 @@ class MainMenu:
                              'About this game',
                              'Exit to desktop']
         self.showFPS = True
+        self.screenshot = None
 
     def draw(self):
         self.start_time = time.time()
@@ -635,6 +646,7 @@ class MainMenu:
         if event.type == KEYDOWN:
             if event.key == K_RETURN:
                 if index == 0:
+                    fade(640, 480, self.screenshot, self.screen)
                     self.game.start(self.showFPS)
                 elif index == 1:
                     self.options.start(self.showFPS)
@@ -697,6 +709,7 @@ class MainMenu:
         if self.showFPS:
             fps = str(int(self.clock.get_fps()))
             self.smallFont.render(self.screen, fps, (WIDTH - 40, 20))
+        self.screenshot = self.screen.copy()
 
     def fillArray(self, array):
         for x in range(len(array)):
