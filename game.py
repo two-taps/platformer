@@ -485,6 +485,8 @@ class VideoMenu(MenuScreen):
                     if index != 0:
                         self.stateList[index] = False
                         self.stateList[index - 1] = True
+                elif event.key == K_ESCAPE:
+                    self.running = False
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 if pos[0] >= 44 and pos[0] <= 174:
@@ -571,6 +573,8 @@ class OptionsMenu(MenuScreen):
                     if index != 0:
                         self.stateList[index] = False
                         self.stateList[index - 1] = True
+                elif event.key == K_ESCAPE:
+                    self.running = False
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 if pos[0] >= 44 and pos[0] <= 174:
