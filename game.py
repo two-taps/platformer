@@ -395,7 +395,7 @@ class Game:
             self.restart = False
         if levelIsOver:
             self.levelIndex += 1
-            file = open('saver.txt', 'w')
+            file = open('data/saver.txt', 'w')
             file.write(str(self.levelIndex))
             file.close()
         if movement[1] >= 1200:
@@ -641,10 +641,10 @@ class MainMenu(MenuScreen):
         self.showFPS = True
         self.screenshot = None
         self.progress = False
-        if os.stat("saver.txt").st_size != 0:
+        if os.stat('data/saver.txt').st_size != 0:
             self.progress = True
-            with open('saver.txt') as f:
-                index = int(f.readline().strip())
+            with open('data/saver.txt') as file:
+                index = int(file.readline().strip())
         else:
             index = 0
         self.game = Game(self.screen, self.clock, self.smallFont, self.largeFont, index)
