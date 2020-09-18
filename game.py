@@ -323,7 +323,7 @@ class MapLevel:
         self.player.entity.set_pos(pos[0], pos[1])
 
 class Game:
-    def __init__(self, screen, clock, smallFont, largeFont):
+    def __init__(self, screen, clock, smallFont, largeFont, index):
 
         self.screen = screen
         self.clock = clock
@@ -336,7 +336,7 @@ class Game:
         self.isPaused = False
         self.fullscreen = False
         self.restart = False
-        self.levelIndex = 0
+        self.levelIndex = index
         self.screen.set_alpha(None)
 
         self.startTime: int = 0
@@ -428,6 +428,8 @@ class MenuScreen:
         self.background = e.entity(0, 0, 640, 480, background)
         self.button = pygame.image.load('data/images/button01.png').convert_alpha()
         self.selectedButton = pygame.image.load('data/images/buttonPressed01.png').convert_alpha()
+        self.unavailableButton = pygame.image.load('data/images/unavailableButton.png').convert_alpha()
+        self.unavailableSelected = pygame.image.load('data/images/unavailableSelected.png').convert_alpha()
 
     def start(self, showFPS):
         self.showFPS = showFPS
@@ -617,20 +619,33 @@ class OptionsMenu(MenuScreen):
         pygame.display.update()
         self.clock.tick(FPS)
 
+class LevelsMenu(MenuScreen):
+    def __init__(self, screen, clock, smallFont, largeFont, background):
+        super().__init__(screen, clock, smallFont, largeFont, background)
+
 class MainMenu(MenuScreen):
     def __init__(self, screen, clock, smallFont, largeFont, background):
         super().__init__(screen, clock, smallFont, largeFont, background)
         self.options = OptionsMenu(self.screen, self.clock, self.smallFont, self.largeFont, 'menuBackground')
-        self.game = Game(self.screen, self.clock, self.smallFont, self.largeFont)
-        self.stateList = [True, False, False, False]
-        self.buttonList = ['Start', 'Options', 'About', 'Quit']
+        self.stateList = [True, False, False, False, False]
+        self.buttonList = ['Start', 'Continue', 'Options', 'About', 'Quit']
         self.descriptions = ['Start the game',
+                             'Continue where you left',
                              'Explore game options',
                              'About this game',
                              'Exit to desktop']
         self.title = 'Main Menu'
         self.showFPS = True
         self.screenshot = None
+        self.progress = False
+        if os.stat("saver.txt").st_size != 0:
+            self.progress = True
+            with open('saver.txt') as f:
+                index = int(f.readline().strip())
+        else:
+            index = 0
+        self.game = Game(self.screen, self.clock, self.smallFont, self.largeFont, index)
+        print(index)
 
     def events(self):
         self.running = e.checkCloseButtons()
@@ -643,11 +658,14 @@ class MainMenu(MenuScreen):
                         fade(640, 480, self.screenshot, self.screen)
                         self.game.start(self.showFPS)
                     elif index == 1:
-                        self.options.start(self.showFPS)
+                        if self.progress:
+                            self.game.start(self.showFPS)
                     elif index == 2:
+                        self.options.start(self.showFPS)
+                    elif index == 3:
                         pass
-                    else:
-                        return False
+                    elif index == 4:
+                        self.running = False
                 if event.key == K_DOWN:
                     if index < len(self.stateList) - 1:
                         self.stateList[index] = False
@@ -662,10 +680,13 @@ class MainMenu(MenuScreen):
                     if pos[1] >= 187 and pos[1] <= 216:
                         self.game.start(self.showFPS)
                     elif pos[1] >= 228 and pos[1] <= 261:
-                        self.options.start(self.showFPS)
+                        if self.progress:
+                            self.game.start(self.showFPS)
                     elif pos[1] >= 271 and pos[1] <= 301:
-                        pass
+                        self.options.start(self.showFPS)
                     elif pos[1] >= 314 and pos[1] <= 346:
+                        pass
+                    elif pos[1] >= 357 and pos[1] <= 386:
                         self.running = False
 
     def update(self):
@@ -683,19 +704,34 @@ class MainMenu(MenuScreen):
             elif pos[1] >= 314 and pos[1] <= 346:
                 self.stateList = self.fillArray(self.stateList)
                 self.stateList[3] = True
+            elif pos[1] >= 357 and pos[1] <= 386:
+                self.stateList = self.fillArray(self.stateList)
+                self.stateList[4] = True
         y = 180
         i = 0
         for state in self.stateList:
             if state:
-                self.screen.blit(self.selectedButton, (40, y))
+                if i == 1:
+                    if not self.progress:
+                        self.screen.blit(self.unavailableSelected, (40, y))
+                    else:
+                        self.screen.blit(self.selectedButton, (40, y))
+                else:
+                    self.screen.blit(self.selectedButton, (40, y))
                 self.smallFont.render(self.screen, self.descriptions[i],
                                       (200, y + 14), WHITE)
                 self.smallFont.render(self.screen, self.buttonList[i],
                                      (65, y + 14), WHITE)
             else:
-                self.screen.blit(self.button, (40, y))
+                if i == 1:
+                    if not self.progress:
+                        self.screen.blit(self.unavailableButton, (40, y))
+                    else:
+                        self.screen.blit(self.button, (40, y))
+                else:
+                    self.screen.blit(self.button, (40, y))
                 self.smallFont.render(self.screen, self.buttonList[i],
-                                     (65, y + 10), WHITE)
+                                        (65, y + 10), WHITE)
             y += 43
             i += 1
         self.showFPS = self.options.showFPS
@@ -758,8 +794,8 @@ class Core:
         self.run()
 
     def run(self):
-        # self.running = True
         self.menu.start(self.showFPS)
+        self.running = self.menu.running
 
 c = Core()
 while c.running:
