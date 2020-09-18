@@ -324,7 +324,7 @@ class MapLevel:
 
 class Game:
     def __init__(self, screen, clock, smallFont, largeFont):
-        e.load_animations('data/images/entities/')
+
         self.screen = screen
         self.clock = clock
         self.smallFont = smallFont
@@ -613,66 +613,56 @@ class OptionsMenu(MenuScreen):
         pygame.display.update()
         self.clock.tick(FPS)
 
-class MainMenu:
-    def __init__(self, screen, game, smallFont, largeFont, clock):
-        self.screen = screen
-        self.clock = clock
-        self.game = game
-        self.smallFont = smallFont
-        self.largeFont = largeFont
-        self.background = e.entity(0, 0, 640, 480, 'menuBackground')
+class MainMenu(MenuScreen):
+    def __init__(self, screen, clock, smallFont, largeFont, background):
+        super().__init__(screen, clock, smallFont, largeFont, background)
         self.options = OptionsMenu(self.screen, self.clock, self.smallFont, self.largeFont, 'menuBackground')
-        self.button = pygame.image.load('data/images/button01.png').convert_alpha()
-        self.selectedButton = pygame.image.load('data/images/buttonPressed01.png').convert_alpha()
+        self.game = Game(self.screen, self.clock, self.smallFont, self.largeFont)
         self.stateList = [True, False, False, False]
         self.buttonList = ['Start', 'Options', 'About', 'Quit']
-        self.descriptions = ['Start a new game',
+        self.descriptions = ['Start the game',
                              'Explore game options',
                              'About this game',
                              'Exit to desktop']
+        self.title = 'Main Menu'
         self.showFPS = True
         self.screenshot = None
 
-    def draw(self):
-        self.start_time = time.time()
-        self.background.display(self.screen, [0, 0])
-        self.background.changeFrame(1)
-
-        self.largeFont.render(self.screen, 'Main Menu', (40, 120), WHITE)
-
-    def events(self, event):
+    def events(self):
+        self.running = e.checkCloseButtons()
         index = self.stateList.index(True)
-        if event.type == KEYDOWN:
-            if event.key == K_RETURN:
-                if index == 0:
-                    fade(640, 480, self.screenshot, self.screen)
-                    self.game.start(self.showFPS)
-                elif index == 1:
-                    self.options.start(self.showFPS)
-                elif index == 2:
-                    pass
-                else:
-                    return False
-            if event.key == K_DOWN:
-                if index < len(self.stateList) - 1:
-                    self.stateList[index] = False
-                    self.stateList[index + 1] = True
-            if event.key == K_UP:
-                if index != 0:
-                    self.stateList[index] = False
-                    self.stateList[index - 1] = True
-        if event.type == pygame.MOUSEBUTTONUP:
-            pos = pygame.mouse.get_pos()
-            if pos[0] >= 44 and pos[0] <= 174:
-                if pos[1] >= 187 and pos[1] <= 216:
-                    self.game.start(self.showFPS)
-                elif pos[1] >= 228 and pos[1] <= 261:
-                    self.options.start(self.showFPS)
-                elif pos[1] >= 271 and pos[1] <= 301:
-                    pass
-                elif pos[1] >= 314 and pos[1] <= 346:
-                    return False
-        return True
+        for event in pygame.event.get():
+            self.running, self.fullscreen, self.screen = e.checkEvents(event, self.running, self.fullscreen, self.screen)
+            if event.type == KEYDOWN:
+                if event.key == K_RETURN:
+                    if index == 0:
+                        fade(640, 480, self.screenshot, self.screen)
+                        self.game.start(self.showFPS)
+                    elif index == 1:
+                        self.options.start(self.showFPS)
+                    elif index == 2:
+                        pass
+                    else:
+                        return False
+                if event.key == K_DOWN:
+                    if index < len(self.stateList) - 1:
+                        self.stateList[index] = False
+                        self.stateList[index + 1] = True
+                if event.key == K_UP:
+                    if index != 0:
+                        self.stateList[index] = False
+                        self.stateList[index - 1] = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                if pos[0] >= 44 and pos[0] <= 174:
+                    if pos[1] >= 187 and pos[1] <= 216:
+                        self.game.start(self.showFPS)
+                    elif pos[1] >= 228 and pos[1] <= 261:
+                        self.options.start(self.showFPS)
+                    elif pos[1] >= 271 and pos[1] <= 301:
+                        pass
+                    elif pos[1] >= 314 and pos[1] <= 346:
+                        self.running = False
 
     def update(self):
         pos = pygame.mouse.get_pos()
@@ -709,11 +699,8 @@ class MainMenu:
             fps = str(int(1.0 / (time.time() - self.start_time)))
             self.smallFont.render(self.screen, fps, (WIDTH - 40, 20))
         self.screenshot = self.screen.copy()
-
-    def fillArray(self, array):
-        for x in range(len(array)):
-            array[x] = False
-        return array
+        pygame.display.update()
+        self.clock.tick(FPS)
 
 class Pause:
     def __init__(self, screen):
@@ -754,37 +741,20 @@ class Core:
         self.screen = pygame.display.set_mode(WINDOW_SIZE, 0, 32)
         self.clock = pygame.time.Clock()
         pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
-        self.fullscreen = False
-        self.running = True
-
-    def new(self):
+        e.load_animations('data/images/entities/')
         self.smallFont = e.Font('data/images/small_font2.png')
         self.largeFont = e.Font('data/images/large_font.png')
-        self.game = Game(self.screen, self.clock, self.smallFont, self.largeFont)
-        self.menu = MainMenu(self.screen, self.game, self.smallFont, self.largeFont, self.clock)
+        # self.fullscreen = False
+        self.running = True
+        self.showFPS = True
+
+    def new(self):
+        self.menu = MainMenu(self.screen,  self.clock, self.smallFont, self.largeFont, 'menuBackground')
         self.run()
 
     def run(self):
-        self.running = True
-        while self.running:
-            self.draw()
-            self.events()
-            self.update()
-
-    def draw(self):
-        self.menu.draw()
-
-    def events(self):
-        self.running = e.checkCloseButtons()
-
-        for event in pygame.event.get():
-            self.running = self.menu.events(event)
-            self.running, self.fullscreen, self.screen = e.checkEvents(event, self.running, self.fullscreen, self.screen)
-
-    def update(self):
-        self.menu.update()
-        pygame.display.update()
-        self.clock.tick(FPS)
+        # self.running = True
+        self.menu.start(self.showFPS)
 
 c = Core()
 while c.running:
