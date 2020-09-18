@@ -744,11 +744,12 @@ class Core:
         pygame.display.set_caption('platformer')
         self.screen = pygame.display.set_mode(WINDOW_SIZE, 0, 32)
         self.clock = pygame.time.Clock()
+        icon = e.loadImage('data/images/chain.png', alpha=True)
         pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
         e.load_animations('data/images/entities/')
         self.smallFont = e.Font('data/images/small_font2.png')
         self.largeFont = e.Font('data/images/large_font.png')
-        # self.fullscreen = False
+        pygame.display.set_icon(icon)
         self.running = True
         self.showFPS = True
 
