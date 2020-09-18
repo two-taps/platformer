@@ -395,6 +395,9 @@ class Game:
             self.restart = False
         if levelIsOver:
             self.levelIndex += 1
+            file = open('saver.txt', 'w')
+            file.write(str(self.levelIndex))
+            file.close()
         if movement[1] >= 1200:
             self.restart = True
 
