@@ -3,7 +3,7 @@ from pygame.locals import *
 from settings import *
 
 global e_colorkey
-e_colorkey = (255,255,255)
+e_colorkey = (0,0,0)
 background = None
 
 def set_global_colorkey(colorkey):
@@ -426,13 +426,13 @@ animation_higher_database = {}
 
 # a sequence looks like [[0,1],[1,1],[2,1],[3,1],[4,2]]
 # the first numbers are the image name(as integer), while the second number shows the duration of it in the sequence
-def animation_sequence(sequence,base_path,colorkey=(255,255,255),transparency=255):
+def animation_sequence(sequence,base_path,colorkey=(0,0,0),transparency=255):
     global animation_database
     result = []
     for frame in sequence:
         image_id = base_path + base_path.split('/')[-2] + '_' + str(frame[0])
         image = pygame.image.load(image_id + '.png').convert_alpha()
-        #image.set_colorkey(colorkey)
+        image.set_colorkey(colorkey)
         #image.set_alpha(transparency)
         animation_database[image_id] = image.copy()
         for i in range(frame[1]):

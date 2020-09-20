@@ -5,7 +5,7 @@ from settings import *
 
 class Player:
     def __init__(self, x, y):
-        self.entity = e.entity(x, y, 14, 29, 'player')
+        self.entity = e.entity(x, y, 32, 32, 'player')
         self.movingRight = False
         self.movingLeft = False
         self.momentum = 0
@@ -54,7 +54,7 @@ class Player:
         if self.movingLeft == True:
             self.movement[0] -= 300 * dt
         self.movement[1] += self.momentum*2.4
-        self.momentum += 20 * dt
+        self.momentum += 22 * dt
         if self.momentum > 5:
             self.momentum = 5
 
@@ -66,6 +66,12 @@ class Player:
         elif self.movement[0] < 0:
             self.entity.set_flip(True)
             self.entity.set_action('run')
+        if self.airTimer != 0: #and self.movement[0] < 0:
+            # self.entity.set_flip(True)
+            self.entity.set_action('jump')
+        # elif self.airTimer != 0 and self.movement[0] > 0:
+        #     self.entity.set_flip(False)
+        #     self.entity.set_action('jump')
 
         collisionList = self.entity.move(self.movement, tile_rects, enemiesList, movingList, notCollisionable, self.airTimer)
 
@@ -164,7 +170,7 @@ class StaticPlatform(MapObject):
         return MOVING_SPEED
 
 class MapLevel:
-    def __init__(self, screen, x, y, map):
+    def __init__(self, screen, x, y, map, speed):
         self.screen = screen
 
         self.layer00 = e.loadImage('data/images/background40.png', alpha=True)
@@ -202,6 +208,7 @@ class MapLevel:
         self.notCollisionable = []
         self.trueScroll = [0, 0]
         self.create = True
+        self.backgroundSpeed = speed
 
     def draw(self, dt):
         self.screen.fill(BEIGE)
@@ -217,8 +224,8 @@ class MapLevel:
 
         i = 0
         for layer in self.layerList:
-            self.screen.blit(layer, (-100 - self.scroll[0]*FAST_SPEED[i],
-                                     -150 - (self.scroll[1] / 1)*FAST_SPEED[i]))
+            self.screen.blit(layer, (-100 - self.scroll[0]*self.backgroundSpeed[i],
+                                     -80 - (self.scroll[1] / 1)*self.backgroundSpeed[i]))
             i += 1
 
         self.tile_rects = []
@@ -253,7 +260,7 @@ class MapLevel:
                             plat = MapObject(self.screen, x*TILE_SIZE, y*TILE_SIZE, 32, 16, 'throughRight')
                             self.movingList.append(plat)
                         elif tile == 'n':
-                            plat = MapObject(self.screen, x*TILE_SIZE, y*TILE_SIZE, 32, 32, 'endBall')
+                            plat = MapObject(self.screen, x*TILE_SIZE, y*TILE_SIZE, 64, 64, 'endBall')
                             self.notCollisionable.append(plat)
                     elif tile == '7':
                         e.displayTile(self.middlePlat02, self.screen, self.scroll, x, y)
@@ -330,8 +337,8 @@ class Game:
         self.smallFont = smallFont
         self.largeFont = largeFont
         self.pause = Pause(self.screen)
-        self.levelList = [MapLevel(self.screen, 50, 200, 'map01'),
-                          MapLevel(self.screen, 140, 500, 'map02')]
+        self.levelList = [MapLevel(self.screen, 50, 200, 'map01', FAST_SPEED),
+                          MapLevel(self.screen, 140, 0, 'map02', NORMAL_SPEED)]
         self.running = True
         self.isPaused = False
         self.fullscreen = False
@@ -632,7 +639,7 @@ class MainMenu(MenuScreen):
         self.options = OptionsMenu(self.screen, self.clock, self.smallFont, self.largeFont, 'menuBackground')
         self.stateList = [True, False, False, False, False]
         self.buttonList = ['Start', 'Continue', 'Options', 'About', 'Quit']
-        self.descriptions = ['Start the game',
+        self.descriptions = ['Start new game',
                              'Continue where you left',
                              'Explore game options',
                              'About this game',
@@ -659,6 +666,7 @@ class MainMenu(MenuScreen):
                 if event.key == K_RETURN:
                     if index == 0:
                         fade(640, 480, self.screenshot, self.screen)
+                        self.game = Game(self.screen, self.clock, self.smallFont, self.largeFont, 0)
                         self.game.start(self.showFPS)
                     elif index == 1:
                         if self.progress:
