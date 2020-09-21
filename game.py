@@ -46,6 +46,10 @@ class Player:
                 self.movingLeft = False
             if event.key == K_a:
                 self.movingLeft = False
+            if event.key == K_DOWN:
+                self.through = not self.through
+            if event.key == K_s:
+                self.through = not self.through
 
     def update(self, tile_rects, enemiesList, movingList, notCollisionable, screen, scroll, dt, distance):
         self.movement = [0,0]
@@ -53,7 +57,7 @@ class Player:
             self.movement[0] += 300 * dt
         if self.movingLeft == True:
             self.movement[0] -= 300 * dt
-        self.movement[1] += self.momentum*2.4
+        self.movement[1] += self.momentum * 2.4
         self.momentum += 22 * dt
         if self.momentum > 5:
             self.momentum = 5
@@ -66,14 +70,10 @@ class Player:
         elif self.movement[0] < 0:
             self.entity.set_flip(True)
             self.entity.set_action('run')
-        if self.airTimer != 0: #and self.movement[0] < 0:
-            # self.entity.set_flip(True)
+        if self.airTimer != 0:
             self.entity.set_action('jump')
-        # elif self.airTimer != 0 and self.movement[0] > 0:
-        #     self.entity.set_flip(False)
-        #     self.entity.set_action('jump')
 
-        collisionList = self.entity.move(self.movement, tile_rects, enemiesList, movingList, notCollisionable, self.airTimer)
+        collisionList = self.entity.move(self.movement, tile_rects, enemiesList, movingList, notCollisionable, self.airTimer, self.through)
 
         exitData = [False, False]
 
@@ -655,7 +655,7 @@ class MainMenu(MenuScreen):
         else:
             index = 0
         self.game = Game(self.screen, self.clock, self.smallFont, self.largeFont, index)
-        print(index)
+        # print(index)
 
     def events(self):
         self.running = e.checkCloseButtons()

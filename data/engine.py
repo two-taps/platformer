@@ -132,9 +132,11 @@ class physics_obj(object):
         self.x = x
         self.y = y
         self.prevX = 0
+        self.thorugh = False
 
-    def move(self, movement, tiles, enemiesList=[], movingList=[], notCollisionable=[], airTimer=0):
+    def move(self, movement, tiles, enemiesList=[], movingList=[], notCollisionable=[], airTimer=0, through=False):
         #tile_rects, enemiesList, movingList, notCollisionable
+        self.through = through
         self.x += movement[0]
         self.rect.x = int(self.x)
 
@@ -174,14 +176,18 @@ class physics_obj(object):
             self.y = self.rect.y
         #====================================================================
         block_hit_list = movingCollision(self.rect, movingList)
+
         for block in block_hit_list:
             type = block.type
             markers = [False,False,False,False]
             tol = abs(self.rect.bottom - block.entity.obj.rect.top)
-            if movement[1] > 0 and tol < 16:
-                self.rect.bottom = block.entity.obj.rect.top
-                collision_types['bottom'] = True
-                markers[2] = True
+            if not self.through:
+                if movement[1] > 0 and tol < 16:
+                    self.rect.bottom = block.entity.obj.rect.top
+                    collision_types['bottom'] = True
+                    markers[2] = True
+            else:
+                markers = [False,False,False,False]
             collision_types['data'].append([block.entity.obj.rect,markers, type])
             self.change_y = 0
             self.y = self.rect.y
@@ -302,8 +308,8 @@ class entity(object):
         self.obj.rect.x = x
         self.obj.rect.y = y
 
-    def move(self,momentum,platforms,ramps=[], platRects=[], vertRects=[], airTimer=0):
-        collisions = self.obj.move(momentum,platforms,ramps, platRects, vertRects, airTimer)
+    def move(self,momentum,platforms,ramps=[], platRects=[], vertRects=[], airTimer=0, through=False):
+        collisions = self.obj.move(momentum,platforms,ramps, platRects, vertRects, airTimer, through)
         self.x = self.obj.x
         self.y = self.obj.y
         return collisions
